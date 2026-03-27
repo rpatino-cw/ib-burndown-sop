@@ -1,0 +1,644 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IB Burndown — Visual Field Guide</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,700;1,400&family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --cream: #faf6f0;
+    --cream-dark: #f0ebe3;
+    --ink: #1c1917;
+    --ink-light: #44403c;
+    --ink-muted: #78716c;
+    --amber: #d97706;
+    --amber-light: #fef3c7;
+    --amber-bg: #fffbeb;
+    --red: #dc2626;
+    --red-light: #fee2e2;
+    --green: #16a34a;
+    --green-light: #dcfce7;
+    --blue: #2563eb;
+    --blue-light: #dbeafe;
+    --navy: #0f172a;
+    --radius: 12px;
+    --font-body: 'DM Sans', system-ui, sans-serif;
+    --font-display: 'Fraunces', Georgia, serif;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: var(--font-body);
+    background: var(--cream);
+    color: var(--ink);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+  }
+
+  /* ── NAV ── */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 50;
+    background: rgba(250, 246, 240, 0.92);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(28, 25, 23, 0.08);
+    transition: transform 0.3s ease;
+  }
+  nav.hide { transform: translateY(-100%); }
+  .nav-inner {
+    max-width: 1100px; margin: 0 auto;
+    display: flex; align-items: center; gap: 24px;
+    padding: 12px 24px;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .nav-inner::-webkit-scrollbar { display: none; }
+  .nav-brand {
+    font-family: var(--font-display); font-weight: 800;
+    font-size: 1.1rem; color: var(--ink);
+    white-space: nowrap; flex-shrink: 0;
+  }
+  .nav-links { display: flex; gap: 4px; flex-shrink: 0; }
+  .nav-links a {
+    font-size: 0.8rem; font-weight: 500; color: var(--ink-muted);
+    text-decoration: none; padding: 6px 12px; border-radius: 6px;
+    transition: all 0.2s; white-space: nowrap;
+  }
+  .nav-links a:hover { background: var(--cream-dark); color: var(--ink); }
+  .nav-links a.active { background: var(--ink); color: var(--cream); }
+
+  /* ── HERO ── */
+  .hero {
+    position: relative;
+    height: 70vh; min-height: 420px; max-height: 600px;
+    overflow: hidden;
+    margin-top: 52px;
+  }
+  .hero img {
+    width: 100%; height: 100%;
+    object-fit: cover; object-position: center 40%;
+    filter: brightness(0.55);
+  }
+  .hero-text {
+    position: absolute; bottom: 0; left: 0; right: 0;
+    padding: 60px 32px 40px;
+    background: linear-gradient(to top, rgba(15, 23, 42, 0.95) 0%, transparent 100%);
+    color: white;
+  }
+  .hero-text h1 {
+    font-family: var(--font-display); font-weight: 800;
+    font-size: clamp(2rem, 5vw, 3.2rem);
+    line-height: 1.15; margin-bottom: 8px;
+    letter-spacing: -0.02em;
+  }
+  .hero-text p {
+    font-size: clamp(0.95rem, 2vw, 1.1rem);
+    color: rgba(255,255,255,0.75); max-width: 500px;
+  }
+  .hero-badge {
+    display: inline-block; background: var(--amber);
+    color: white; font-weight: 700; font-size: 0.7rem;
+    padding: 3px 10px; border-radius: 4px;
+    text-transform: uppercase; letter-spacing: 0.06em;
+    margin-bottom: 12px;
+  }
+
+  /* ── MAIN ── */
+  .main { max-width: 900px; margin: 0 auto; padding: 0 20px; }
+
+  /* ── SECTION ── */
+  .section {
+    padding: 56px 0 40px;
+    opacity: 0; transform: translateY(32px);
+    transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1),
+                transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .section.visible { opacity: 1; transform: translateY(0); }
+
+  .section-num {
+    font-family: var(--font-display); font-weight: 800;
+    font-size: 0.85rem; color: var(--amber);
+    text-transform: uppercase; letter-spacing: 0.1em;
+    margin-bottom: 4px;
+  }
+  .section h2 {
+    font-family: var(--font-display); font-weight: 800;
+    font-size: clamp(1.5rem, 3.5vw, 2rem);
+    color: var(--ink); line-height: 1.2;
+    margin-bottom: 6px; letter-spacing: -0.01em;
+  }
+  .section-sub {
+    font-size: 0.95rem; color: var(--ink-muted);
+    margin-bottom: 24px; max-width: 600px;
+  }
+
+  /* ── IMAGE BLOCK ── */
+  .img-block {
+    border-radius: var(--radius); overflow: hidden;
+    margin-bottom: 24px; position: relative;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+  }
+  .img-block img {
+    display: block; width: 100%; height: auto;
+  }
+  .img-caption {
+    position: absolute; bottom: 0; left: 0; right: 0;
+    padding: 32px 20px 16px;
+    background: linear-gradient(to top, rgba(0,0,0,0.7) 0%, transparent 100%);
+    color: white; font-size: 0.85rem; font-weight: 500;
+  }
+
+  /* ── CARDS ── */
+  .card-grid {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 16px; margin-bottom: 24px;
+  }
+  @media (max-width: 640px) { .card-grid { grid-template-columns: 1fr; } }
+
+  .card {
+    background: white; border-radius: var(--radius);
+    padding: 20px; border: 1px solid rgba(28, 25, 23, 0.06);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  }
+  .card h3 {
+    font-family: var(--font-display); font-weight: 600;
+    font-size: 1.05rem; margin-bottom: 6px; color: var(--ink);
+  }
+  .card p, .card li { font-size: 0.88rem; color: var(--ink-light); line-height: 1.65; }
+  .card ul { padding-left: 16px; }
+  .card-full { grid-column: 1 / -1; }
+
+  /* ── TAGS ── */
+  .tag {
+    display: inline-block; font-size: 0.7rem; font-weight: 700;
+    padding: 3px 10px; border-radius: 5px;
+    text-transform: uppercase; letter-spacing: 0.04em;
+  }
+  .tag-core { background: #ede9fe; color: #7c3aed; }
+  .tag-spine { background: #e0f2fe; color: #0284c7; }
+  .tag-leaf { background: var(--green-light); color: var(--green); }
+  .tag-node { background: var(--amber-light); color: var(--amber); }
+
+  /* ── CALLOUT ── */
+  .callout {
+    border-radius: var(--radius); padding: 16px 20px;
+    margin-bottom: 20px; font-size: 0.88rem;
+    display: flex; gap: 12px; align-items: flex-start;
+  }
+  .callout-icon { font-size: 1.3rem; flex-shrink: 0; line-height: 1; }
+  .callout-warn { background: var(--amber-bg); border: 1px solid #fde68a; color: #92400e; }
+  .callout-danger { background: var(--red-light); border: 1px solid #fca5a5; color: #991b1b; }
+  .callout-info { background: var(--blue-light); border: 1px solid #93c5fd; color: #1e40af; }
+  .callout strong { font-weight: 700; }
+
+  /* ── SPLIT LAYOUT ── */
+  .split {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 24px; margin-bottom: 24px; align-items: start;
+  }
+  .split-img { border-radius: var(--radius); overflow: hidden; box-shadow: 0 4px 24px rgba(0,0,0,0.08); }
+  .split-img img { display: block; width: 100%; height: auto; }
+  @media (max-width: 700px) { .split { grid-template-columns: 1fr; } }
+
+  /* ── DECISION TREE ── */
+  .tree-visual {
+    background: white; border-radius: var(--radius);
+    border: 1px solid rgba(28, 25, 23, 0.06);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    overflow: hidden; margin-bottom: 24px;
+  }
+  .tree-visual img { display: block; width: 100%; height: auto; }
+  .tree-explain {
+    padding: 20px 24px;
+    border-top: 1px solid rgba(28,25,23,0.06);
+  }
+  .tree-explain h3 {
+    font-family: var(--font-display); font-weight: 600;
+    font-size: 1rem; margin-bottom: 8px;
+  }
+
+  /* ── STEP LIST ── */
+  .steps { list-style: none; padding: 0; counter-reset: step; }
+  .steps li {
+    counter-increment: step;
+    display: flex; gap: 12px; align-items: flex-start;
+    padding: 10px 0; font-size: 0.88rem; color: var(--ink-light);
+    border-bottom: 1px solid rgba(28,25,23,0.04);
+  }
+  .steps li:last-child { border-bottom: none; }
+  .steps li::before {
+    content: counter(step);
+    flex-shrink: 0;
+    width: 28px; height: 28px;
+    display: flex; align-items: center; justify-content: center;
+    background: var(--ink); color: var(--cream);
+    font-weight: 700; font-size: 0.75rem;
+    border-radius: 50%;
+  }
+
+  /* ── VERDICT TABLE ── */
+  .verdict-table {
+    width: 100%; border-collapse: separate; border-spacing: 0;
+    font-size: 0.88rem; margin-top: 12px;
+    border-radius: var(--radius); overflow: hidden;
+    border: 1px solid rgba(28,25,23,0.06);
+  }
+  .verdict-table th {
+    text-align: left; font-weight: 600;
+    font-size: 0.75rem; text-transform: uppercase;
+    letter-spacing: 0.06em; color: var(--ink-muted);
+    background: var(--cream-dark); padding: 10px 14px;
+  }
+  .verdict-table td {
+    padding: 10px 14px; border-top: 1px solid rgba(28,25,23,0.04);
+    color: var(--ink-light);
+  }
+  .pass { color: var(--green); font-weight: 700; }
+  .fail { color: var(--red); font-weight: 700; }
+
+  /* ── PORT DIAGRAM (compact) ── */
+  .port-diagram-compact {
+    background: var(--navy); color: #94a3b8; border-radius: var(--radius);
+    padding: 20px; font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', monospace;
+    font-size: clamp(0.65rem, 1.8vw, 0.8rem);
+    line-height: 1.9; overflow-x: auto; white-space: pre;
+    margin-bottom: 16px;
+  }
+  .port-diagram-compact .lbl { color: #e2e8f0; font-weight: 600; }
+  .port-diagram-compact .s1 { color: #38bdf8; }
+  .port-diagram-compact .s2 { color: #fbbf24; }
+  .port-diagram-compact .flip { color: #f87171; font-weight: 700; }
+
+  /* ── FOOTER ── */
+  .footer {
+    text-align: center; padding: 40px 20px 60px;
+    font-size: 0.8rem; color: var(--ink-muted);
+  }
+  .footer a { color: var(--amber); text-decoration: none; }
+
+  /* ── STAGGER CHILDREN ── */
+  .section.visible .stagger { animation: fadeUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) both; }
+  .section.visible .stagger:nth-child(1) { animation-delay: 0.05s; }
+  .section.visible .stagger:nth-child(2) { animation-delay: 0.12s; }
+  .section.visible .stagger:nth-child(3) { animation-delay: 0.19s; }
+  .section.visible .stagger:nth-child(4) { animation-delay: 0.26s; }
+  .section.visible .stagger:nth-child(5) { animation-delay: 0.33s; }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ── REDUCED MOTION ── */
+  @media (prefers-reduced-motion: reduce) {
+    .section { opacity: 1; transform: none; transition: none; }
+    .section.visible .stagger { animation: none; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ══ NAV ══ -->
+<nav id="nav">
+  <div class="nav-inner">
+    <span class="nav-brand">IB Field Guide</span>
+    <div class="nav-links">
+      <a href="#naming">Naming</a>
+      <a href="#orientation">Ports</a>
+      <a href="#portdown">Port Down</a>
+      <a href="#ber">BER</a>
+      <a href="#misconnect">Misconnect</a>
+      <a href="#loopback">Loopback</a>
+    </div>
+  </div>
+</nav>
+
+<!-- ══ HERO ══ -->
+<div class="hero">
+  <img src="img/hero-aisle.png" alt="DCT walking through a data center hot aisle">
+  <div class="hero-text">
+    <div class="hero-badge">EVI01 &middot; US-CENTRAL-07A</div>
+    <h1>IB Burndown<br>Field Guide</h1>
+    <p>Find the problem. Eliminate variables. Fix it once.</p>
+  </div>
+</div>
+
+<div class="main">
+
+  <!-- ══ RULE ZERO ══ -->
+  <div class="section" style="padding-top:40px;">
+    <div class="callout callout-danger stagger">
+      <span class="callout-icon">!</span>
+      <div><strong>Both sides, every time.</strong> Every link has two ends. Always check, clean, and verify both Side A and Side B before calling anything fixed.</div>
+    </div>
+  </div>
+
+  <!-- ══ 1. HOW TO READ THE BURNDOWN ══ -->
+  <div class="section">
+    <div class="section-num stagger">Step 01</div>
+    <h2 class="stagger">Read the Burndown Sheet</h2>
+    <p class="section-sub stagger">The sheet tells you three things: what's wrong, where Side A is, and where Side B is.</p>
+
+    <div class="card-grid">
+      <div class="card stagger">
+        <h3>Port Down</h3>
+        <p><code>C7.19 22/1 => S7.6.3 10/1</code></p>
+        <p style="margin-top:6px;">No signal between these two ports. Something is blocking light from getting through.</p>
+      </div>
+      <div class="card stagger">
+        <h3>BER (Bit Errors)</h3>
+        <p><code>C7.19 22/1 => S7.6.3 10/1</code></p>
+        <p style="margin-top:6px;">Link is up but signal is dirty. Usually means dirty fiber or a bad cable.</p>
+      </div>
+      <div class="card stagger">
+        <h3>Misconnect</h3>
+        <p><code>C2.17 13/2 should be &rarr; S2.4.2 9/1<br>but is &rarr; S2.4.2 9/2</code></p>
+        <p style="margin-top:6px;">Cable is plugged into the wrong port. Needs to be moved.</p>
+      </div>
+      <div class="card stagger">
+        <h3>Reading the Notation</h3>
+        <p><strong>C7.19</strong> = switch name<br>
+           <strong>22</strong> = port number<br>
+           <strong>/1</strong> = lane (which slot on the optic)</p>
+        <p style="margin-top:6px;"><code>=></code> means "is connected to"</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ 2. SWITCH NAMING ══ -->
+  <div class="section" id="naming">
+    <div class="section-num stagger">Step 02</div>
+    <h2 class="stagger">Know Your Switches</h2>
+    <p class="section-sub stagger">The first letter tells you what kind of switch it is. That tells you where to look.</p>
+
+    <div class="img-block stagger">
+      <img src="img/switch-naming.png" alt="Switch naming prefix decoder — Core, Spine, Leaf, Node hierarchy diagram">
+    </div>
+
+    <div class="card-grid">
+      <div class="card stagger">
+        <h3><span class="tag tag-core">C</span> Core</h3>
+        <p>Top of the tree. Only in DH1. Example: <code>C1.4</code> = plane 1, switch 4.</p>
+      </div>
+      <div class="card stagger">
+        <h3><span class="tag tag-spine">S</span> Spine</h3>
+        <p>Middle tier. In all data halls. Example: <code>S8.3.2</code> = group 8, tier 3, position 2.</p>
+      </div>
+      <div class="card stagger">
+        <h3><span class="tag tag-leaf">L</span> Leaf</h3>
+        <p>End of row, connects to nodes. Example: <code>L10.1.2-DH2</code> = cabinet 10, switch 1.2, DH2.</p>
+      </div>
+      <div class="card stagger">
+        <h3><span class="tag tag-node">N</span> Node</h3>
+        <p>Compute node (GPU server). Example: <code>N1.4</code> = node 1, NIC 4.</p>
+      </div>
+    </div>
+
+    <div class="callout callout-info stagger">
+      <span class="callout-icon">i</span>
+      <div><strong>Finding the cabinet:</strong> The number right after the prefix is your cabinet. <code>C<strong>1</strong>.4</code> = Core cab 1. <code>L<strong>10</strong>.1.2</code> = Cab 10. Use the overhead map to locate it on the floor, then the IB Sketch elevation tabs to find the switch inside the cab.</div>
+    </div>
+  </div>
+
+  <!-- ══ 3. PORT ORIENTATION ══ -->
+  <div class="section" id="orientation">
+    <div class="section-num stagger">Step 03</div>
+    <h2 class="stagger">Port Orientation (The Flip)</h2>
+    <p class="section-sub stagger">This is the #1 cause of accidental misconnects. Bottom-row optics are mirrored.</p>
+
+    <div class="split stagger">
+      <div>
+        <div class="img-block" style="margin-bottom:0;">
+          <img src="img/port-orientation.png" alt="QM9790 optic slot orientation — top row normal, bottom row flipped">
+        </div>
+      </div>
+      <div>
+        <div class="callout callout-danger" style="margin-bottom:16px;">
+          <span class="callout-icon">!</span>
+          <div><strong>Bottom row is flipped.</strong><br>Top row: slot 1 on the LEFT.<br>Bottom row: slot 1 on the RIGHT.</div>
+        </div>
+        <div class="port-diagram-compact"><span class="lbl">Top Row (normal):</span>
+  ┌──────┐ ┌──────┐
+  │<span class="s1"> 1 </span>│<span class="s2"> 2 </span>│ │<span class="s1"> 1 </span>│<span class="s2"> 2 </span>│
+  └──────┘ └──────┘
+
+<span class="lbl">Bottom Row</span> <span class="flip">FLIPPED:</span>
+  ┌──────┐ ┌──────┐
+  │<span class="s2"> 2 </span>│<span class="s1"> 1 </span>│ │<span class="s2"> 2 </span>│<span class="s1"> 1 </span>│
+  └──────┘ └──────┘</div>
+        <p style="font-size:0.85rem; color:var(--ink-muted);">Each slot has its own LED. Green/Amber = link up. Off = no link.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ 4. PORT DOWN ══ -->
+  <div class="section" id="portdown">
+    <div class="section-num stagger">Decision Tree 01</div>
+    <h2 class="stagger">Port Down</h2>
+    <p class="section-sub stagger">No signal. Your job: figure out which piece is broken — optic, cable, or switch.</p>
+
+    <div class="split stagger">
+      <div class="split-img">
+        <img src="img/ir-card-check.png" alt="Gloved hand holding IR detector card checking fiber optic light output">
+      </div>
+      <div>
+        <div class="card" style="margin-bottom:16px;">
+          <h3>Start here: IR card</h3>
+          <p>Pull the fiber out. Hold the IR card up to the tip. Is there a pink/purple glow?</p>
+          <p style="margin-top:8px;"><strong>Light = the optic on this side is sending.</strong><br>No light = the problem might be on this side.</p>
+        </div>
+        <div class="callout callout-warn">
+          <span class="callout-icon">!</span>
+          <div>Always check <strong>both sides</strong> with the IR card. Knowing which side has light narrows it to 1 of 3 variables.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tree-visual stagger">
+      <img src="img/decision-port-down.png" alt="Port Down decision tree flowchart">
+      <div class="tree-explain">
+        <h3>How to read this</h3>
+        <ol class="steps">
+          <li>IR card the fiber on Side A. Light? Then that optic is transmitting fine.</li>
+          <li>Go to Side B and IR card that fiber too.</li>
+          <li><strong>Both sides have light, but no link?</strong> Clean + reseat. If still down, swap the cable.</li>
+          <li><strong>One side has no light?</strong> Loopback test that side's optic. FAIL = bad optic, RMA it.</li>
+          <li><strong>Neither side has light?</strong> Loopback both. Whichever fails = bad optic.</li>
+        </ol>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ 5. BER ══ -->
+  <div class="section" id="ber">
+    <div class="section-num stagger">Decision Tree 02</div>
+    <h2 class="stagger">BER (Bit Error Rate)</h2>
+    <p class="section-sub stagger">Link is up but the signal is noisy. Escalate the fix until it clears.</p>
+
+    <div class="tree-visual stagger">
+      <img src="img/decision-ber.png" alt="BER decision tree flowchart — clean, deep clean, swap cable, RMA">
+      <div class="tree-explain">
+        <h3>Escalation ladder</h3>
+        <ol class="steps">
+          <li><strong>Standard clean + reseat</strong> — both sides. Check if BER clears.</li>
+          <li><strong>Deep clean</strong> — IPA wipe + canned air on both optics and fiber tips. Check again.</li>
+          <li><strong>Swap the cable</strong> — use a known-good cable. If BER clears, the old cable was bad.</li>
+          <li><strong>Still errors?</strong> The optic is degraded. RMA it.</li>
+        </ol>
+        <p style="margin-top:10px; font-size:0.85rem; color:var(--ink-muted);">Key idea: you're changing one variable at a time. If the BER clears after step N, the thing you changed at step N was the problem.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ 6. MISCONNECT ══ -->
+  <div class="section" id="misconnect">
+    <div class="section-num stagger">Decision Tree 03</div>
+    <h2 class="stagger">Misconnect</h2>
+    <p class="section-sub stagger">Cable is in the wrong port. Before you move anything — verify the cutsheet is right.</p>
+
+    <div class="split stagger">
+      <div class="split-img">
+        <img src="img/two-racks-connected.png" alt="Two server racks connected by a fiber cable — Side A and Side B">
+      </div>
+      <div>
+        <div class="card" style="margin-bottom:16px;">
+          <h3>Two racks, one cable</h3>
+          <p>Every burndown entry has a Side A and a Side B. The cable connects them. A misconnect means one end (or both) is in the wrong slot.</p>
+        </div>
+        <div class="callout callout-warn">
+          <span class="callout-icon">!</span>
+          <div><strong>Slot flip!</strong> If the burndown says port X/<strong>1</strong> and you're on the bottom row, slot 1 is on the <strong>right</strong>, not the left.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tree-visual stagger">
+      <img src="img/decision-misconnect.png" alt="Misconnect decision tree flowchart">
+      <div class="tree-explain">
+        <h3>Before you unplug</h3>
+        <ol class="steps">
+          <li><strong>Verify the cutsheet</strong> — does the "should be" port in the burndown match what IB Sketch says? If not, don't touch it. Comment on the sheet and flag to networking.</li>
+          <li><strong>Is the correct port empty?</strong> If yes, move the cable there. Check LED.</li>
+          <li><strong>Correct port is occupied?</strong> That's a chain misconnect. Trace what's in that port too — you may need to move 2-3 cables in sequence.</li>
+          <li><strong>Map all moves first.</strong> Write down every cable you need to move before unplugging anything.</li>
+        </ol>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ 7. LOOPBACK ══ -->
+  <div class="section" id="loopback">
+    <div class="section-num stagger">Reference</div>
+    <h2 class="stagger">Loopback Matrix</h2>
+    <p class="section-sub stagger">A loopback test tells you if an optic is good or bad. Test both sides, read the grid.</p>
+
+    <div class="split stagger">
+      <div class="split-img">
+        <img src="img/loopback-test.png" alt="Loopback adapter inserted into a QSFP port with green LED lights">
+      </div>
+      <div>
+        <div class="card">
+          <h3>What it does</h3>
+          <p>A loopback adapter sends the optic's own light back to itself. If the LED comes up, the optic can both send and receive — it's healthy.</p>
+          <p style="margin-top:8px;"><strong>PASS</strong> = optic is good.<br><strong>FAIL</strong> = optic is dead or degraded.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="card stagger" style="margin-top:24px;">
+      <div class="img-block" style="box-shadow:none; margin-bottom:16px;">
+        <img src="img/loopback-matrix.png" alt="Loopback PASS/FAIL verdict matrix table">
+      </div>
+      <table class="verdict-table">
+        <tr><th>Side A</th><th>Side B</th><th>What it means</th></tr>
+        <tr><td class="pass">PASS</td><td class="pass">PASS</td><td>Both optics fine — cable or config is the problem</td></tr>
+        <tr><td class="pass">PASS</td><td class="fail">FAIL</td><td>Side B optic is bad — RMA it</td></tr>
+        <tr><td class="fail">FAIL</td><td class="pass">PASS</td><td>Side A optic is bad — RMA it</td></tr>
+        <tr><td class="fail">FAIL</td><td class="fail">FAIL</td><td>Both bad, or the switch port itself is dead — try fresh optics, if still fails, escalate</td></tr>
+      </table>
+    </div>
+
+    <div class="callout callout-danger stagger" style="margin-top:20px;">
+      <span class="callout-icon">!</span>
+      <div><strong>Dead switch port:</strong> New optic + loopback still fails on the same port = the port itself is dead. That's not something you can fix — escalate to networking.</div>
+    </div>
+  </div>
+
+  <!-- ══ 8. ESCALATION ══ -->
+  <div class="section">
+    <div class="section-num stagger">When You're Stuck</div>
+    <h2 class="stagger">Escalate</h2>
+
+    <div class="card-grid">
+      <div class="card stagger">
+        <h3>When to escalate</h3>
+        <ul>
+          <li>Loopback fails with a <strong>new</strong> optic</li>
+          <li>Known-good cable won't link after both optics pass</li>
+          <li>Cutsheet doesn't match the burndown entry</li>
+        </ul>
+      </div>
+      <div class="card stagger">
+        <h3>What to include</h3>
+        <p>Comment on the Google Sheet row with:</p>
+        <ul>
+          <li>Switch name + port</li>
+          <li>What you tested (clean, loopback, cable swap)</li>
+          <li>LED result + IR card result</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ══ FOOTER ══ -->
+<div class="footer">
+  EVI01 IB Burndown Field Guide &middot; US-CENTRAL-07A &middot; DH1/DH2<br>
+  Cleaning procedures: <a href="#">Stephanie Lenzo's guide on Confluence</a><br>
+  <span id="date"></span>
+</div>
+
+<script>
+  // Date
+  document.getElementById('date').textContent =
+    new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+
+  // Intersection Observer — reveal sections on scroll
+  const sections = document.querySelectorAll('.section');
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.classList.add('visible');
+        io.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.12 });
+  sections.forEach(s => io.observe(s));
+
+  // Nav hide on scroll down, show on scroll up
+  let lastY = 0;
+  const nav = document.getElementById('nav');
+  window.addEventListener('scroll', () => {
+    const y = window.scrollY;
+    nav.classList.toggle('hide', y > lastY && y > 120);
+    lastY = y;
+
+    // Active nav link
+    const links = document.querySelectorAll('.nav-links a');
+    let current = '';
+    document.querySelectorAll('[id]').forEach(sec => {
+      if (sec.getBoundingClientRect().top < 200) current = sec.id;
+    });
+    links.forEach(a => {
+      a.classList.toggle('active', a.getAttribute('href') === '#' + current);
+    });
+  }, { passive: true });
+</script>
+</body>
+</html>

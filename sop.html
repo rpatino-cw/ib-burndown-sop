@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IB Burndown SOP — EVI01</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0f1117;
+    --bg-card: #1a1d2e;
+    --border: #2a2e45;
+    --text: #b0b3c6;
+    --text-medium: #8b8fa6;
+    --text-contrast: #e8eaf0;
+    --primary: #4264ff;
+    --primary-dim: #4264ff33;
+    --success: #22c55e;
+    --success-dim: #22c55e1a;
+    --warning: #eab308;
+    --warning-dim: #eab3081a;
+    --danger: #ef4444;
+    --danger-dim: #ef44441a;
+    --cyan: #06b6d4;
+    --cyan-dim: #06b6d41a;
+    --purple: #a78bfa;
+    --purple-dim: #a78bfa1a;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Source Sans 3', -apple-system, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+  .page { max-width: 860px; margin: 0 auto; padding: 24px 16px 80px; }
+  .header { border-bottom: 1px solid var(--border); padding-bottom: 20px; margin-bottom: 32px; }
+  .header h1 { font-size: 1.75rem; font-weight: 700; color: var(--text-contrast); margin-bottom: 4px; }
+  .header .subtitle { font-size: 0.875rem; color: var(--text-medium); }
+  .header .site-badge {
+    display: inline-block; background: var(--primary-dim); color: var(--primary);
+    font-size: 0.75rem; font-weight: 600; padding: 2px 8px; border-radius: 4px;
+    margin-left: 8px; vertical-align: middle;
+  }
+
+  .toc { background: var(--bg-card); border: 1px solid var(--border); border-radius: 8px; padding: 16px 20px; margin-bottom: 32px; }
+  .toc h2 { font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-medium); margin-bottom: 10px; }
+  .toc ol { list-style: none; counter-reset: toc; padding-left: 0; }
+  .toc li { counter-increment: toc; margin-bottom: 4px; }
+  .toc li::before { content: counter(toc) "."; color: var(--primary); font-weight: 600; margin-right: 8px; font-size: 0.875rem; }
+  .toc a { color: var(--text); text-decoration: none; font-size: 0.875rem; transition: color 0.15s; }
+  .toc a:hover { color: var(--primary); }
+
+  .section { margin-bottom: 40px; }
+  .section h2 { font-size: 1.25rem; font-weight: 700; color: var(--text-contrast); margin-bottom: 6px; padding-top: 20px; border-top: 1px solid var(--border); }
+  .section h2 .step-num { color: var(--primary); margin-right: 6px; }
+  .section-desc { font-size: 0.875rem; color: var(--text-medium); margin-bottom: 16px; }
+
+  .card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 8px; padding: 16px 20px; margin-bottom: 12px; }
+  .card h3 { font-size: 1rem; font-weight: 600; color: var(--text-contrast); margin-bottom: 8px; }
+  .card p, .card li { font-size: 0.875rem; color: var(--text); line-height: 1.7; }
+
+  .chip { display: inline-block; font-size: 0.7rem; font-weight: 600; padding: 2px 8px; border-radius: 4px; vertical-align: middle; }
+  .chip-core { background: var(--purple-dim); color: var(--purple); }
+  .chip-spine { background: var(--cyan-dim); color: var(--cyan); }
+  .chip-leaf { background: var(--success-dim); color: var(--success); }
+  .chip-node { background: var(--warning-dim); color: var(--warning); }
+  .chip-danger { background: var(--danger-dim); color: var(--danger); }
+  .chip-primary { background: var(--primary-dim); color: var(--primary); }
+
+  .callout { border-radius: 8px; padding: 14px 16px; margin-bottom: 12px; font-size: 0.85rem; border-left: 3px solid; }
+  .callout-warn { background: var(--warning-dim); border-color: var(--warning); color: var(--warning); }
+  .callout-danger { background: var(--danger-dim); border-color: var(--danger); color: var(--danger); }
+  .callout-info { background: var(--primary-dim); border-color: var(--primary); color: #93a8ff; }
+  .callout strong { color: inherit; }
+
+  .ref-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; margin-top: 8px; }
+  .ref-table th { text-align: left; font-weight: 600; color: var(--text-medium); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.04em; padding: 8px 12px; border-bottom: 1px solid var(--border); }
+  .ref-table td { padding: 8px 12px; border-bottom: 1px solid var(--border); color: var(--text); }
+  .ref-table tr:last-child td { border-bottom: none; }
+  .ref-table code { background: var(--bg); padding: 2px 6px; border-radius: 4px; font-family: 'SF Mono', 'Fira Code', monospace; font-size: 0.8rem; color: var(--text-contrast); }
+
+  .port-diagram {
+    background: var(--bg); border: 1px solid var(--border); border-radius: 8px;
+    padding: 16px; font-family: 'SF Mono', 'Fira Code', monospace; font-size: 0.8rem;
+    line-height: 1.8; color: var(--text-medium); overflow-x: auto; margin: 12px 0; white-space: pre;
+  }
+  .port-diagram .label { color: var(--text-contrast); font-weight: 600; }
+  .port-diagram .slot1 { color: var(--cyan); }
+  .port-diagram .slot2 { color: var(--warning); }
+  .port-diagram .alert { color: var(--danger); font-weight: 700; }
+
+  /* ── Decision Trees ── */
+  .tree {
+    background: var(--bg); border: 1px solid var(--border); border-radius: 8px;
+    padding: 16px 20px; font-family: 'SF Mono', 'Fira Code', monospace; font-size: 0.8rem;
+    line-height: 2; color: var(--text-medium); overflow-x: auto; margin: 12px 0; white-space: pre;
+  }
+  .tree .root { color: var(--text-contrast); font-weight: 700; }
+  .tree .q { color: var(--primary); }
+  .tree .yes { color: var(--success); }
+  .tree .no { color: var(--danger); }
+  .tree .action { color: var(--cyan); font-weight: 600; }
+  .tree .esc { color: var(--warning); font-weight: 600; }
+
+  @media (max-width: 640px) {
+    .page { padding: 16px 12px 60px; }
+    .header h1 { font-size: 1.35rem; }
+    .port-diagram, .tree { font-size: 0.7rem; padding: 12px; }
+    .ref-table { font-size: 0.78rem; }
+    .ref-table th, .ref-table td { padding: 6px 8px; }
+  }
+  @media print {
+    body { background: #fff; color: #333; }
+    .card { border: 1px solid #ccc; background: #fafafa; }
+    .callout { border-left-width: 4px; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <div class="header">
+    <h1>IB Burndown SOP <span class="site-badge">EVI01</span></h1>
+    <div class="subtitle">US-CENTRAL-07A &middot; DH1 / DH2 &middot; Variable Elimination &amp; Decision Logic</div>
+  </div>
+
+  <div class="callout callout-danger">
+    <strong>Both sides.</strong> Everything on this page applies to both ends of the link. Verify correct optic/fiber before unplugging anything.
+  </div>
+
+  <div class="toc">
+    <h2>Contents</h2>
+    <ol>
+      <li><a href="#read">Read the Burndown List</a></li>
+      <li><a href="#naming">Switch Naming</a></li>
+      <li><a href="#locate">Find the Physical Location</a></li>
+      <li><a href="#ports">Port Orientation (Slot Flip)</a></li>
+      <li><a href="#decide">Decision Trees</a></li>
+      <li><a href="#loopback">Loopback Matrix</a></li>
+      <li><a href="#escalate">Escalation</a></li>
+    </ol>
+  </div>
+
+  <!-- ═══════ 1. READ THE BURNDOWN ═══════ -->
+  <div class="section" id="read">
+    <h2><span class="step-num">1.</span> Read the Burndown List</h2>
+
+    <div class="card">
+      <table class="ref-table">
+        <tr><th>Type</th><th>Format</th><th>Meaning</th></tr>
+        <tr>
+          <td><span class="chip chip-danger">Port Down</span></td>
+          <td><code>C7.19 22/1 =&gt; S7.6.3 10/1</code></td>
+          <td>No signal between these two ports</td>
+        </tr>
+        <tr>
+          <td><span class="chip chip-danger">Misconnect</span></td>
+          <td><code>C2.17 13/2 should be → S2.4.2 9/1 but is → S2.4.2 9/2</code></td>
+          <td>Cable in wrong port</td>
+        </tr>
+        <tr>
+          <td><span class="chip" style="background:var(--warning-dim);color:var(--warning);">BER</span></td>
+          <td><code>C7.19 22/1 =&gt; S7.6.3 10/1</code></td>
+          <td>Link up but degraded &mdash; dirty or damaged</td>
+        </tr>
+      </table>
+    </div>
+
+    <div class="card">
+      <h3>Notation</h3>
+      <p><code>C7.19 22/1</code> = switch <strong>C7.19</strong>, port <strong>22</strong>, lane <strong>1</strong> (slot 1 on the optic)</p>
+      <p><code>=&gt;</code> = these two ports should be connected to each other</p>
+    </div>
+  </div>
+
+  <!-- ═══════ 2. SWITCH NAMING ═══════ -->
+  <div class="section" id="naming">
+    <h2><span class="step-num">2.</span> Switch Naming</h2>
+
+    <div class="card">
+      <table class="ref-table">
+        <tr><th>Prefix</th><th>Type</th><th>Where</th><th>Example</th></tr>
+        <tr>
+          <td><span class="chip chip-core">C</span></td>
+          <td>Core</td><td>DH1 only</td>
+          <td><code>C1.4</code> &mdash; plane 1, switch 4</td>
+        </tr>
+        <tr>
+          <td><span class="chip chip-spine">S</span></td>
+          <td>Spine</td><td>All DHs</td>
+          <td><code>S8.3.2</code> &mdash; group 8, tier 3, pos 2</td>
+        </tr>
+        <tr>
+          <td><span class="chip chip-leaf">L</span></td>
+          <td>Leaf</td><td>End-cabs</td>
+          <td><code>L10.1.2-DH2</code> &mdash; cab 10, sw 1.2</td>
+        </tr>
+        <tr>
+          <td><span class="chip chip-node">N</span></td>
+          <td>Node</td><td>Compute</td>
+          <td><code>N1.4</code> &mdash; node 1, NIC 4</td>
+        </tr>
+      </table>
+      <p style="font-size:0.8rem; color:var(--text-medium); margin-top:10px;">
+        <span class="chip chip-core">Core</span> &harr;
+        <span class="chip chip-spine">Spine</span> &harr;
+        <span class="chip chip-leaf">Leaf</span> &harr;
+        <span class="chip chip-node">Node</span>
+        &nbsp;&nbsp;Core-Spine is always in DH1.
+      </p>
+    </div>
+  </div>
+
+  <!-- ═══════ 3. FIND LOCATION ═══════ -->
+  <div class="section" id="locate">
+    <h2><span class="step-num">3.</span> Find the Physical Location</h2>
+    <p class="section-desc">Cabinet number is in the switch name. Switch position in cab is in the elevation tabs.</p>
+
+    <div class="card">
+      <h3>Cabinet &rarr; from switch name</h3>
+      <p><code>C<strong>1</strong>.4</code> &rarr; Core cab 1 &nbsp;&middot;&nbsp;
+         <code>S<strong>8</strong>.3.2</code> &rarr; Spine group 8 &nbsp;&middot;&nbsp;
+         <code>L<strong>10</strong>.1.2-DH2</code> &rarr; Cab 10, DH2</p>
+      <p style="margin-top:8px; font-size:0.85rem;">Use the <strong>overhead map</strong> to find the cab on the floor.</p>
+    </div>
+
+    <div class="card">
+      <h3>Switch position in cab &rarr; IB Sketch elevation tabs</h3>
+      <p style="font-size:0.85rem;">
+        <span class="chip chip-primary">DH1 Row 5 ELEV</span>
+        <span class="chip chip-primary">DH1 Row 6 ELEV</span>
+        <span class="chip chip-primary">DH1 Row 22 ELEV</span>
+        <span class="chip chip-primary">DH2 Row 13 ELEV</span>
+        <span class="chip chip-primary">DH2 Row 14 ELEV</span>
+      </p>
+      <p style="margin-top:8px; font-size:0.85rem;">These tabs show the front-facing RU view of each cabinet. Find your switch name in the diagram.</p>
+    </div>
+  </div>
+
+  <!-- ═══════ 4. PORT ORIENTATION ═══════ -->
+  <div class="section" id="ports">
+    <h2><span class="step-num">4.</span> Port Orientation (Slot Flip)</h2>
+
+    <div class="callout callout-danger">
+      <strong>Bottom-row optics are flipped.</strong> Top = 1|2. Bottom = 2|1. Wrong slot = misconnect.
+    </div>
+
+    <div class="port-diagram"><span class="label">QM9790 — Front View</span>
+
+<span class="label">Top Row:</span>    ┌──────┐ ┌──────┐ ┌──────┐ ┌──────┐
+              │<span class="slot1"> 1 </span>│<span class="slot2"> 2 </span>│ │<span class="slot1"> 1 </span>│<span class="slot2"> 2 </span>│ │<span class="slot1"> 1 </span>│<span class="slot2"> 2 </span>│ │<span class="slot1"> 1 </span>│<span class="slot2"> 2 </span>│
+              └──────┘ └──────┘ └──────┘ └──────┘
+
+<span class="label">Bottom Row:</span>  ┌──────┐ ┌──────┐ ┌──────┐ ┌──────┐
+              │<span class="slot2"> 2 </span>│<span class="slot1"> 1 </span>│ │<span class="slot2"> 2 </span>│<span class="slot1"> 1 </span>│ │<span class="slot2"> 2 </span>│<span class="slot1"> 1 </span>│ │<span class="slot2"> 2 </span>│<span class="slot1"> 1 </span>│  <span class="alert">FLIPPED</span>
+              └──────┘ └──────┘ └──────┘ └──────┘
+
+22/<span class="slot1">1</span> = port 22, <span class="slot1">slot 1</span>    22/<span class="slot2">2</span> = port 22, <span class="slot2">slot 2</span>
+Each slot has its own LED: <span style="color:var(--success);">GREEN/AMBER</span> = up · <span style="color:var(--danger);">OFF</span> = down</div>
+  </div>
+
+  <!-- ═══════ 5. DECISION TREES ═══════ -->
+  <div class="section" id="decide">
+    <h2><span class="step-num">5.</span> Decision Trees</h2>
+    <p class="section-desc">Eliminate variables in order. Don't clean blindly &mdash; figure out WHERE the problem is first.</p>
+
+    <div class="card">
+      <h3>Port Down</h3>
+      <div class="tree"><span class="root">PORT DOWN</span> &rarr; <span class="q">IR card: light coming out of fiber?</span>
+ │
+ ├─ <span class="no">No light</span> &rarr; Problem is upstream (other end or cable)
+ │   ├─ <span class="q">Check other side &mdash; light there?</span>
+ │   │   ├─ <span class="yes">Yes</span> &rarr; <span class="action">Bad cable. Swap it.</span>
+ │   │   └─ <span class="no">No</span> &rarr; <span class="q">Optic or switch issue. Loopback test both sides.</span>
+ │   │        ├─ Loopback <span class="yes">PASS</span> &rarr; <span class="action">Both optics good. Cable is bad. Swap.</span>
+ │   │        └─ Loopback <span class="no">FAIL</span> &rarr; <span class="action">Bad optic. RMA the failing side.</span>
+ │
+ └─ <span class="yes">Light present</span> &rarr; <span class="q">LED status after clean + reseat?</span>
+      ├─ <span class="yes">LED up</span> &rarr; <span class="action">Was dirty. Done. Mark the sheet.</span>
+      └─ <span class="no">LED still off</span> &rarr; Optic sees light but won't link
+           ├─ Loopback <span class="yes">PASS</span> &rarr; <span class="action">Cable or config issue. Try known-good cable.</span>
+           └─ Loopback <span class="no">FAIL</span> &rarr; <span class="action">Bad optic. RMA.</span></div>
+    </div>
+
+    <div class="card">
+      <h3>BER (Bit Error Rate)</h3>
+      <div class="tree"><span class="root">BER</span> &rarr; <span class="q">Clean + reseat both sides</span>
+ │
+ ├─ <span class="yes">BER clears</span> &rarr; <span class="action">Done. Mark the sheet.</span>
+ │
+ └─ <span class="no">BER persists</span> &rarr; <span class="q">Deep clean (IPA + canned air) both sides</span>
+      ├─ <span class="yes">BER clears</span> &rarr; <span class="action">Done.</span>
+      └─ <span class="no">BER persists</span> &rarr; <span class="q">Swap cable</span>
+           ├─ <span class="yes">BER clears</span> &rarr; <span class="action">Bad cable. Replace permanently.</span>
+           └─ <span class="no">BER persists</span> &rarr; <span class="action">Optic degraded. RMA.</span></div>
+    </div>
+
+    <div class="card">
+      <h3>Misconnect</h3>
+      <div class="tree"><span class="root">MISCONNECT</span> &rarr; <span class="q">Verify cutsheet says "should be" port is correct</span>
+ │
+ ├─ <span class="no">Cutsheet doesn't match</span> &rarr; <span class="esc">Don't touch it. Comment on sheet, flag to network.</span>
+ │
+ └─ <span class="yes">Cutsheet confirms</span> &rarr; <span class="q">Is the correct port already occupied?</span>
+      ├─ <span class="yes">Empty</span> &rarr; <span class="action">Move cable. Verify slot flip (top vs bottom row). Check LED.</span>
+      └─ <span class="no">Occupied</span> &rarr; <span class="esc">Chain misconnect. Trace that cable too.</span>
+           └─ May need to move 2-3 cables in sequence.
+              <span class="action">Map out all moves before unplugging anything.</span></div>
+
+      <div class="callout callout-warn" style="margin-top:12px;">
+        <strong>Slot flip reminder:</strong> If the burndown says port X/<strong>1</strong> and you're on the <strong>bottom row</strong>, slot 1 is on the RIGHT, not the left.
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════ 6. LOOPBACK MATRIX ═══════ -->
+  <div class="section" id="loopback">
+    <h2><span class="step-num">6.</span> Loopback Matrix</h2>
+
+    <div class="card">
+      <table class="ref-table">
+        <tr><th>Side A</th><th>Side B</th><th>Verdict</th></tr>
+        <tr>
+          <td><span style="color:var(--success);">PASS</span></td>
+          <td><span style="color:var(--success);">PASS</span></td>
+          <td>Both optics good &mdash; bad cable or config</td>
+        </tr>
+        <tr>
+          <td><span style="color:var(--success);">PASS</span></td>
+          <td><span style="color:var(--danger);">FAIL</span></td>
+          <td>Side B optic bad &mdash; RMA</td>
+        </tr>
+        <tr>
+          <td><span style="color:var(--danger);">FAIL</span></td>
+          <td><span style="color:var(--success);">PASS</span></td>
+          <td>Side A optic bad &mdash; RMA</td>
+        </tr>
+        <tr>
+          <td><span style="color:var(--danger);">FAIL</span></td>
+          <td><span style="color:var(--danger);">FAIL</span></td>
+          <td>Both bad OR bad switch port &mdash; try new optics, if same result &rarr; escalate</td>
+        </tr>
+      </table>
+    </div>
+
+    <div class="callout callout-danger">
+      <strong>Bad switch port:</strong> New optic + multiple loopbacks still fail on same port = switch port is dead. Escalate to networking.
+    </div>
+  </div>
+
+  <!-- ═══════ 7. ESCALATION ═══════ -->
+  <div class="section" id="escalate">
+    <h2><span class="step-num">7.</span> Escalation</h2>
+
+    <div class="card">
+      <h3>When</h3>
+      <ul style="padding-left:18px; font-size:0.85rem;">
+        <li>Loopback fails with new optic &rarr; bad switch port</li>
+        <li>Known-good cable still won't link after loopback PASS on both sides</li>
+        <li>Cutsheet doesn't match burndown entry</li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <h3>How</h3>
+      <p style="font-size:0.85rem;">Comment on the Google Sheet row with: <strong>switch name, port, what you tested, LED result, IR card result.</strong> Tag network team.</p>
+    </div>
+  </div>
+
+  <div style="border-top:1px solid var(--border); padding-top:16px; margin-top:40px; font-size:0.75rem; color:var(--text-medium);">
+    EVI01 IB Burndown SOP &middot; US-CENTRAL-07A &middot; Cleaning procedures: see Stephanie Lenzo's guide on Confluence
+    <br>Last updated: <span id="date"></span>
+  </div>
+</div>
+<script>
+  document.getElementById('date').textContent = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+</script>
+</body>
+</html>
